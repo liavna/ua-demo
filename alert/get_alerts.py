@@ -4,10 +4,14 @@ from airflow.operators.http_operator import SimpleHttpOperator
 from airflow.operators.sensors import HttpSensor
 
 default_args = {
-    'owner': 'your_username',
-    'start_date': datetime(2023, 1, 1),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': days_ago(1),
+    'email': ['airflow@example.com'],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'max_active_runs': 1,
+    'retries': 0
 }
 
 dag = DAG(
