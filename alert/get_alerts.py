@@ -20,7 +20,7 @@ dag = DAG(
     description='An example Airflow DAG to read JSON file from URL',
     schedule_interval=timedelta(days=1),
     access_control={
-		'liav': {
+		'role_liav': {
 			'can_read',
 			'can_edit',
 			'can_delete'
