@@ -16,7 +16,7 @@ default_args = {
 }
 
 dag = DAG(
-    'example_dag',
+    'get_alerts',
     default_args=default_args,
     description='An example Airflow DAG to read JSON file from URL',
     schedule_interval=timedelta(days=1),
