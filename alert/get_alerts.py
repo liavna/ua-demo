@@ -58,6 +58,6 @@ task = PythonOperator(
     task_id='fetch_and_save_json',
     python_callable=fetch_and_save_json,
     provide_context=True,
-    op_kwargs={'output_folder': '/mnt/shared/ua-demo/'},
+    op_kwargs={'output_folder': 'local:///mnt/shared/ua-demo/'},
     dag=dag,
 )
