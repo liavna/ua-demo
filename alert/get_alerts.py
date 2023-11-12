@@ -34,36 +34,30 @@ dag = DAG(
 	},
 )
 
-def fetch_and_save_to_database(**kwargs):
+def fetch_and_save_json(**kwargs):
     url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
     response = requests.get(url)
-    data = response.json()
 
-    # Assuming a PostgreSQL database connection
-    pg_hook = PostgresHook(postgres_conn_id='presto://ezpresto-svc-https-locator.ezpresto:8081/cache')
-    connection = pg_hook.get_conn()
+    if response.status_code == 200:
+        json_data = response.json()
 
-    # Example: Assuming there is a table called 'your_table' with columns 'column1', 'column2'
-    cursor = connection.cursor()
-    for record in data:
-        cursor.execute(
-            "INSERT INTO your_table (column1, column2) VALUES (%s, %s)",
-            (record['field1'], record['field2'])
-        )
-    connection.commit()
-    cursor.close()
-    connection.close()
+        # Specify the output folder
+        output_folder = kwargs['output_folder']
+        os.makedirs(output_folder, exist_ok=True)
 
-# Define the tasks in the DAG
-fetch_and_save_task = PythonOperator(
-    task_id='fetch_and_save_to_database',
-    python_callable=fetch_and_save_to_database,
+        # Save the JSON data to a file
+        output_file_path = os.path.join(output_folder, 'output.json')
+        with open(output_file_path, 'w') as output_file:
+            json.dump(json_data, output_file, indent=2)
+
+        return f"File saved at {output_file_path}"
+    else:
+        raise Exception(f"Failed to fetch JSON from {url}. Status code: {response.status_code}")
+
+task = PythonOperator(
+    task_id='fetch_and_save_json',
+    python_callable=fetch_and_save_json,
     provide_context=True,
+    op_kwargs={'output_folder': 'local:///mnt/shared/ua-demo/'},
     dag=dag,
 )
-
-# Set task dependencies if necessary
-# task2.set_upstream(task1)
-
-if __name__ == "__main__":
-    dag.cli()
