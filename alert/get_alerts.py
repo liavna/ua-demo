@@ -19,6 +19,13 @@ dag = DAG(
     default_args=default_args,
     description='An example Airflow DAG to read JSON file from URL',
     schedule_interval=timedelta(days=1),
+    access_control={
+		'All': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
 )
 
 def read_json_from_url(**kwargs):
