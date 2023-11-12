@@ -17,13 +17,7 @@ default_args = {
     'email_on_retry': False,
     'max_active_runs': 1,
     'retries': 0
-    "access_control={
-		'role_<username>': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	}"
+   
 }
 def creatableLoad():
 
@@ -72,4 +66,11 @@ dag_pandas = DAG(
 	schedule_interval='@once',	
 	dagrun_timeout=timedelta(minutes=60),
 	description='use case of pandas  in airflow',
-	start_date = airflow.utils.dates.days_ago(1))
+	start_date = airflow.utils.dates.days_ago(1)),
+    access_control={
+	    	'All': {
+		    	'can_read',
+			    'can_edit',
+			    'can_delete'
+		    }
+	}
