@@ -17,16 +17,7 @@ default_args = {
     'max_active_runs': 1,
     'retries': 0
 }
-def getDataToLocal():  
-    
-    url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
-    response = requests.get(url)
-
-    df = pd.DataFrame(json.loads(response.content))
-    df = df.set_index("school_year")
-
-    df.to_csv("/home/hduser/drivers.csv", sep=',' ,escapechar='\\', quoting=csv.QUOTE_ALL, encoding='utf-8' )
-    def creatableLoad():
+def creatableLoad():
 
     try:
         dbconnect = pg.connect(
@@ -66,11 +57,3 @@ def getDataToLocal():
             row.split(",")[4])
             )
     dbconnect.commit()
-    dag_pandas = DAG(
-	dag_id = "using_pandas_demo",
-	default_args=default_args ,
-	# schedule_interval='0 0 * * *',
-	schedule_interval='@once',	
-	dagrun_timeout=timedelta(minutes=60),
-	description='use case of pandas  in airflow',
-	start_date = airflow.utils.dates.days_ago(1))
