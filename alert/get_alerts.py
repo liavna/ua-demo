@@ -6,7 +6,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.hooks.postgres_hook import PostgresHook
 
 default_args = {
-    'owner': 'your_username',
+    'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2023, 1, 1),
     'email_on_failure': False,
