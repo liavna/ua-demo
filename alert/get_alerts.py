@@ -7,6 +7,13 @@ from datetime import timedelta
 from airflow.utils.dates import days_ago
 import requests
 import json
+ccess_control={
+		'All': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	}
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
