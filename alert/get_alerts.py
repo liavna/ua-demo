@@ -17,13 +17,13 @@ default_args = {
     'email_on_retry': False,
     'max_active_runs': 1,
     'retries': 0
-    access_control={
+    "access_control={
 		'role_<username>': {
 			'can_read',
 			'can_edit',
 			'can_delete'
 		}
-	}
+	}"
 }
 def creatableLoad():
 
