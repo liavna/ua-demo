@@ -1,12 +1,7 @@
-
-import airflow
-from datetime import timedelta
+from datetime import datetime, timedelta
+from textwrap import dedent
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from datetime import timedelta
-from airflow.utils.dates import days_ago
-import requests
-import json
+from airflow.operators.bash import BashOperator
 
 default_args = {
     'owner': 'airflow',
@@ -17,60 +12,59 @@ default_args = {
     'email_on_retry': False,
     'max_active_runs': 1,
     'retries': 0
-   
 }
-def creatableLoad():
+with DAG(
+    'tutorial',
+    default_args=default_args,
+    description='A simple tutorial DAG',
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2021, 1, 1),
+    catchup=False,
+    tags=['example'],
+) as dag:
 
-    try:
-        dbconnect = pg.connect(
-            "dbname='dezyre_new' user='postgres' host='localhost' password='root'"
-        )
-    except Exception as error:
-        print(error)
-    
-    # create the table if it does not already exist
-    cursor = dbconnect.cursor()
-    cursor.execute("""
-         CREATE TABLE IF NOT EXISTS drivers_data (
-            school_year varchar(50),
-            vendor_name varchar(50),
-            type_of_service varchar(50),
-            active_employees varchar(50),
-            job_type varchar(50)
-        );
-        
-        TRUNCATE TABLE drivers_data;
+    # t1, t2 and t3 are examples of tasks created by instantiating operators
+    t1 = BashOperator(
+        task_id='print_date',
+        bash_command='date',
+    )
+
+    t2 = BashOperator(
+        task_id='sleep',
+        depends_on_past=False,
+        bash_command='sleep 5',
+        retries=3,
+    )
+    t1.doc_md = dedent(
+        """\
+    #### Task Documentation
+    You can document your task using the attributes `doc_md` (markdown),
+    `doc` (plain text), `doc_rst`, `doc_json`, `doc_yaml` which gets
+    rendered in the UI's Task Instance Details page.
+    ![img](http://montcs.bloomu.edu/~bobmon/Semesters/2012-01/491/import%20soul.png)
+
     """
     )
-    dbconnect.commit()
-    
-    # insert each csv row as a record in our database
-    with open('/home/hduser/drivers.csv', 'r') as f:
-        next(f)  # skip the first row (header)     
-        for row in f:
-            cursor.execute("""
-                INSERT INTO drivers_data
-                VALUES ('{}', '{}', '{}', '{}', '{}')
-            """.format(
-            row.split(",")[0],
-            row.split(",")[1],
-            row.split(",")[2],
-            row.split(",")[3],
-            row.split(",")[4])
-            )
-    dbconnect.commit()
-dag_pandas = DAG(
-	dag_id = "using_pandas_demo",
-	default_args=default_args ,
-	# schedule_interval='0 0 * * *',
-	schedule_interval='@once',	
-	dagrun_timeout=timedelta(minutes=60),
-	description='use case of pandas  in airflow',
-	start_date = airflow.utils.dates.days_ago(1)),
-    access_control={
-	    	'All': {
-		    	'can_read',
-			    'can_edit',
-			    'can_delete'
-		    }
-	     }
+
+    dag.doc_md = __doc__  # providing that you have a docstring at the beginning of the DAG
+    dag.doc_md = """
+    This is a documentation placed anywhere
+    """  # otherwise, type it like this
+    templated_command = dedent(
+        """
+    {% for i in range(5) %}
+        echo "{{ ds }}"
+        echo "{{ macros.ds_add(ds, 7)}}"
+        echo "{{ params.my_param }}"
+    {% endfor %}
+    """
+    )
+
+    t3 = BashOperator(
+        task_id='templated',
+        depends_on_past=False,
+        bash_command=templated_command,
+        params={'my_param': 'Parameter I passed in'},
+    )
+
+    t1 >> [t2, t3]
