@@ -53,7 +53,6 @@ def fetch_and_save_json(**kwargs):
         return f"File saved at {output_file_path}"
     else:
         raise Exception(f"Failed to fetch JSON from {url}. Status code: {response.status_code}")
-
 task = PythonOperator(
     task_id='fetch_and_save_json',
     python_callable=fetch_and_save_json,
