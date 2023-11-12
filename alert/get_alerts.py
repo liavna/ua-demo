@@ -25,7 +25,7 @@ dag = DAG(
 			'can_edit',
 			'can_delete'
 		},
-        'role_admin': {
+        'role_Admin': {
 			'can_read',
 			'can_edit',
 			'can_delete'
