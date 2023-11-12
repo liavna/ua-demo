@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
-from urllib import request
 import json
+import requests
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from airflow.hooks.postgres_hook import PostgresHook
 
 default_args = {
     'owner': 'your_username',
@@ -33,18 +34,36 @@ dag = DAG(
 	},
 )
 
-def read_json_from_url(**kwargs):
+def fetch_and_save_to_database(**kwargs):
     url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
-    response = request.urlopen(url)
-    data = json.load(response)
-    # Do something with the data, for example, print it
-    print(data)
+    response = requests.get(url)
+    data = response.json()
 
-task_read_json = PythonOperator(
-    task_id='read_json',
-    python_callable=read_json_from_url,
-    provide_context=True,  # This allows you to access the context, including the execution date
+    # Assuming a PostgreSQL database connection
+    pg_hook = PostgresHook(postgres_conn_id='presto://ezpresto-svc-https-locator.ezpresto:8081/cache')
+    connection = pg_hook.get_conn()
+
+    # Example: Assuming there is a table called 'your_table' with columns 'column1', 'column2'
+    cursor = connection.cursor()
+    for record in data:
+        cursor.execute(
+            "INSERT INTO your_table (column1, column2) VALUES (%s, %s)",
+            (record['field1'], record['field2'])
+        )
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+# Define the tasks in the DAG
+fetch_and_save_task = PythonOperator(
+    task_id='fetch_and_save_to_database',
+    python_callable=fetch_and_save_to_database,
+    provide_context=True,
     dag=dag,
 )
 
-task_read_json
+# Set task dependencies if necessary
+# task2.set_upstream(task1)
+
+if __name__ == "__main__":
+    dag.cli()
