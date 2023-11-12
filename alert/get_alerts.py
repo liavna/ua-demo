@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.http_operator import SimpleHttpOperator
-from airflow.operators.sensors import HttpSensor
+ #from airflow.operators.sensors import HttpSensor
 from airflow.operators.python_operator import PythonOperator
 import json
 
