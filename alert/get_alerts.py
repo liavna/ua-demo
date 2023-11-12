@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.http_operator import SimpleHttpOperator
- #from airflow.operators.sensors import HttpSensor
+import airflow
+from datetime import timedelta
+from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from datetime import timedelta
+from airflow.utils.dates import days_ago
+import requests
 import json
 
 default_args = {
