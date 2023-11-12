@@ -17,3 +17,12 @@ default_args = {
     'max_active_runs': 1,
     'retries': 0
 }
+def getDataToLocal():  
+    
+    url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
+    response = requests.get(url)
+
+    df = pd.DataFrame(json.loads(response.content))
+    df = df.set_index("school_year")
+
+    df.to_csv("/home/hduser/drivers.csv", sep=',' ,escapechar='\\', quoting=csv.QUOTE_ALL, encoding='utf-8' )
