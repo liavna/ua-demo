@@ -7,13 +7,7 @@ from datetime import timedelta
 from airflow.utils.dates import days_ago
 import requests
 import json
-ccess_control={
-		'All': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	}
+
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -23,6 +17,13 @@ default_args = {
     'email_on_retry': False,
     'max_active_runs': 1,
     'retries': 0
+    ccess_control={
+		'All': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	}
 }
 def creatableLoad():
 
