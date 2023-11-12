@@ -29,7 +29,7 @@ dag = DAG(
 )
 
 def read_json_from_url(**kwargs):
-    url = "your_json_url_here"
+    url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
     response = request.urlopen(url)
     data = json.load(response)
     # Do something with the data, for example, print it
