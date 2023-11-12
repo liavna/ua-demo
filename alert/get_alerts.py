@@ -57,3 +57,11 @@ def creatableLoad():
             row.split(",")[4])
             )
     dbconnect.commit()
+dag_pandas = DAG(
+	dag_id = "using_pandas_demo",
+	default_args=default_args ,
+	# schedule_interval='0 0 * * *',
+	schedule_interval='@once',	
+	dagrun_timeout=timedelta(minutes=60),
+	description='use case of pandas  in airflow',
+	start_date = airflow.utils.dates.days_ago(1))
