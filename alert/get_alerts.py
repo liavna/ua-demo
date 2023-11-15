@@ -16,6 +16,19 @@ hello_task = PythonOperator(
     task_id='hello_task',  # Task ID
     python_callable=print_hello,  # Function to be called
     dag=dag,  # Assign the DAG to the task
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
+
 )
 
 # Set task dependencies (if you have more tasks in the DAG)
