@@ -1,27 +1,22 @@
+from datetime import datetime, timedelta
+
 from airflow import DAG
-from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.bash import BashOperator
 
-from random import randint
-from datetime import datetime
 
-def _choose_best_model(ti):
-    accuracies = ti.xcom_pull(task_ids=[
-        'training_model_A',
-        'training_model_B',
-        'training_model_C'
-    ])
-    best_accuracy = max(accuracies)
-    if (best_accuracy > 8):
-        return 'accurate'
-    return 'inaccurate'
+default_args = {
+    'owner': 'coder2j',
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2)
+}
 
 
-def _training_model():
-    return randint(1, 10)
-
-with DAG("my_dag", start_date=datetime(2021, 1, 1),
-    schedule_interval="@daily", catchup=False,
+with DAG(
+    dag_id='our_first_dag_v5',
+    default_args=default_args,
+    description='This is our first dag that we write',
+    start_date=datetime(2021, 7, 29, 2),
+    schedule_interval='@daily',
     access_control={
 		'role_liav': {
 			'can_read',
@@ -33,37 +28,30 @@ with DAG("my_dag", start_date=datetime(2021, 1, 1),
 			'can_edit',
 			'can_delete'
 		}
-	},
+	}
 ) as dag:
+    task1 = BashOperator(
+        task_id='first_task',
+        bash_command="echo hello world, this is the first task!"
+    )
 
-        training_model_A = PythonOperator(
-            task_id="training_model_A",
-            python_callable=_training_model
-        )
+    task2 = BashOperator(
+        task_id='second_task',
+        bash_command="echo hey, I am task2 and will be running after task1!"
+    )
 
-        training_model_B = PythonOperator(
-            task_id="training_model_B",
-            python_callable=_training_model
-        )
+    task3 = BashOperator(
+        task_id='thrid_task',
+        bash_command="echo hey, I am task3 and will be running after task1 at the same time as task2!"
+    )
 
-        training_model_C = PythonOperator(
-            task_id="training_model_C",
-            python_callable=_training_model
-        )
+    # Task dependency method 1
+    # task1.set_downstream(task2)
+    # task1.set_downstream(task3)
 
-        choose_best_model = BranchPythonOperator(
-            task_id="choose_best_model",
-            python_callable=_choose_best_model
-        )
+    # Task dependency method 2
+    # task1 >> task2
+    # task1 >> task3
 
-        accurate = BashOperator(
-            task_id="accurate",
-            bash_command="echo 'accurate'"
-        )
-
-        inaccurate = BashOperator(
-            task_id="inaccurate",
-            bash_command="echo 'inaccurate'"
-        )
-
-        [training_model_A, training_model_B, training_model_C] >> choose_best_model >> [accurate, inaccurate]
+    # Task dependency method 3
+    task1 >> [task2, task3]
