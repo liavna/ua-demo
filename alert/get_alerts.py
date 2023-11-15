@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta
-import json
-import requests
+
 from airflow import DAG
-from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 
+
 default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'start_date': datetime(2023, 1, 1),
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'owner': 'coder2j',
+    'retries': 5,
+    'retry_delay': timedelta(minutes=2)
 }
+
+
 with DAG(
     dag_id='our_first_dag_v5',
     default_args=default_args,
