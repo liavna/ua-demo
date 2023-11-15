@@ -40,7 +40,7 @@ def fetch_and_save_json(**kwargs):
         data = response.json()
         
         # Save data to working folder
-        output_path = os.path.join(kwargs['ti'].xcom_push(key='task_instance', value=''), 'output.json')
+        output_path = local:///tmp/ , 'output.json')
         with open(output_path, 'w') as file:
             json.dump(data, file)
     else:
