@@ -12,47 +12,14 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-def download_and_save_json(**kwargs):
-    url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
-    save_path = "/usr/local/airflow/AlertsHistory.json"
-
-    response = requests.get(url)
-    data = response.json()
-
-    with open(save_path, 'w') as json_file:
-        json.dump(data, json_file)
-
-    print(f"Downloaded and saved JSON data to {save_path}")
-
-dag = DAG(
-    'json_download_dag',
-    default_args=default_args,
-    description='DAG to download JSON from URL and save locally',
-    schedule_interval='*/5 * * * *',  # Run every 5 minutes
-    access_control={
-		'role_liav': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		},
-        'role_Admin': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	},
-
+hello_task = PythonOperator(
+    task_id='hello_task',  # Task ID
+    python_callable=print_hello,  # Function to be called
+    dag=dag,  # Assign the DAG to the task
 )
 
-download_task = PythonOperator(
-    task_id='download_json_task',
-    python_callable=download_and_save_json,
-    provide_context=True,
-    dag=dag,
-)
-
-# Set task dependencies if you have more tasks in the DAG
-# task2.set_upstream(task1)
+# Set task dependencies (if you have more tasks in the DAG)
+# e.g., hello_task.set_upstream(another_task)
 
 if __name__ == "__main__":
     dag.cli()
