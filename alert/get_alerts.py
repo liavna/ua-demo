@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import json
 import requests
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 
 default_args = {
     'owner': 'airflow',
