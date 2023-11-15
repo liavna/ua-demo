@@ -12,25 +12,12 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
- with DAG(
+with DAG(
     dag_id='our_first_dag_v5',
     default_args=default_args,
     description='This is our first dag that we write',
     start_date=datetime(2021, 7, 29, 2),
     schedule_interval='@daily'
-    access_control={
-		'role_liav': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		},
-        'role_Admin': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	},
-
 ) as dag:
     task1 = BashOperator(
         task_id='first_task',
