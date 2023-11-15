@@ -16,7 +16,20 @@ dag = DAG(
     'fetch_and_save_json',
     default_args=default_args,
     description='Fetch and save JSON from URL',
-    schedule_interval='@daily',  # Adjust as needed
+    schedule_interval='@daily',
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
+# Adjust as needed
 )
 
 def fetch_and_save_json(**kwargs):
