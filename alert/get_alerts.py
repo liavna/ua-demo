@@ -32,31 +32,32 @@ dag = DAG(
 			'can_delete'
 		}
 	},
-)
+
 
 def fetch_and_save_json(**kwargs):
-    url = "https://www.mako.co.il/Collab/amudanan/alerts.json"
+    url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
     response = requests.get(url)
-
+    
     if response.status_code == 200:
-        json_data = response.json()
-
-        # Specify the output folder
-        output_folder = kwargs['output_folder']
-        os.makedirs(output_folder, exist_ok=True)
-
-        # Save the JSON data to a file
-        output_file_path = os.path.join(output_folder, 'output.json')
-        with open(output_file_path, 'w') as output_file:
-            json.dump(json_data, output_file, indent=2)
-
-        return f"File saved at {output_file_path}"
+        data = response.json()
+        
+        # Save data to working folder
+        output_path = os.path.join(kwargs['ti'].xcom_push(key='task_instance', value=''), 'output.json')
+        with open(output_path, 'w') as file:
+            json.dump(data, file)
     else:
-        raise Exception(f"Failed to fetch JSON from {url}. Status code: {response.status_code}")
-task = PythonOperator(
-    task_id='fetch_and_save_json',
+        raise Exception(f"Failed to fetch data from {url}. Status code: {response.status_code}")
+
+# Define the tasks
+fetch_and_save_task = PythonOperator(
+    task_id='fetch_and_save_task',
     python_callable=fetch_and_save_json,
     provide_context=True,
-    op_kwargs={'output_folder': '/mnt/shared/ua-demo/'},
     dag=dag,
 )
+
+# Set task dependencies
+fetch_and_save_task
+
+if __name__ == "__main__":
+    dag.cli()
