@@ -21,7 +21,20 @@ def _training_model():
     return randint(1, 10)
 
 with DAG("my_dag", start_date=datetime(2021, 1, 1),
-    schedule_interval="@daily", catchup=False) as dag:
+    schedule_interval="@daily", catchup=False,
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
+) as dag:
 
         training_model_A = PythonOperator(
             task_id="training_model_A",
