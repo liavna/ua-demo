@@ -1,38 +1,23 @@
-from datetime import datetime, timedelta
-import json
-import requests
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.hooks.postgres_hook import PostgresHook
+from datetime import datetime, timedelta
+import requests
+import json
+import os
 
 default_args = {
     'owner': 'airflow',
-    'depends_on_past': False,
     'start_date': datetime(2023, 1, 1),
-    'email_on_failure': False,
-    'email_on_retry': False,
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
 
 dag = DAG(
-    'get_alerts',
+    'fetch_and_save_json',
     default_args=default_args,
-    description='An example Airflow DAG to read JSON file from URL',
-    schedule_interval=timedelta(days=1),
-    access_control={
-		'role_liav': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		},
-        'role_Admin': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	},
-
+    description='Fetch and save JSON from URL',
+    schedule_interval='@daily',  # Adjust as needed
+)
 
 def fetch_and_save_json(**kwargs):
     url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
