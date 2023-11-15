@@ -11,11 +11,12 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=5),
 }
-
-hello_task = PythonOperator(
-    task_id='hello_task',  # Task ID
-    python_callable=print_hello,  # Function to be called
-    dag=dag,  # Assign the DAG to the task
+ with DAG(
+    dag_id='our_first_dag_v5',
+    default_args=default_args,
+    description='This is our first dag that we write',
+    start_date=datetime(2021, 7, 29, 2),
+    schedule_interval='@daily'
     access_control={
 		'role_liav': {
 			'can_read',
@@ -29,10 +30,29 @@ hello_task = PythonOperator(
 		}
 	},
 
-)
+) as dag:
+    task1 = BashOperator(
+        task_id='first_task',
+        bash_command="echo hello world, this is the first task!"
+    )
 
-# Set task dependencies (if you have more tasks in the DAG)
-# e.g., hello_task.set_upstream(another_task)
+    task2 = BashOperator(
+        task_id='second_task',
+        bash_command="echo hey, I am task2 and will be running after task1!"
+    )
 
-if __name__ == "__main__":
-    dag.cli()
+    task3 = BashOperator(
+        task_id='thrid_task',
+        bash_command="echo hey, I am task3 and will be running after task1 at the same time as task2!"
+    )
+
+    # Task dependency method 1
+    # task1.set_downstream(task2)
+    # task1.set_downstream(task3)
+
+    # Task dependency method 2
+    # task1 >> task2
+    # task1 >> task3
+
+    # Task dependency method 3
+    task1 >> [task2, task3]
