@@ -6,7 +6,7 @@ from airflow.operators.python_operator import PythonOperator
 
 def download_and_save_json(**kwargs):
     url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
-    save_path = "/usr/local/airflow/AlertsHistory.json"
+    save_path = "/usr/local/airflow/dags/AlertsHistory.json"
 
     response = requests.get(url)
     data = response.json()
