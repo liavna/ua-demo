@@ -19,6 +19,18 @@ dag = DAG(
     default_args=default_args,
     description='A DAG to merge two JSON files',
     schedule_interval=timedelta(days=1),  # Adjust the schedule_interval as needed
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	}
 )
 
 # Define the script to merge JSON files
