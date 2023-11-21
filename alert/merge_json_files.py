@@ -18,6 +18,18 @@ dag = DAG(
     default_args=default_args,
     description='Merge two JSON files',
     schedule_interval='@daily',  # Adjust the schedule as needed
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	}
 )
 
 def merge_json_files(**kwargs):
