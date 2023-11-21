@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
 from airflow.operators.python_operator import PythonOperator
-import pandas as pd
+from airflow.operators.dummy_operator import DummyOperator
+import json
 import os
 
-# DAG configuration
+# Define default_args dictionary
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -13,61 +15,53 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
+# Define DAG
 dag = DAG(
     'merge_json_files',
     default_args=default_args,
-    description='Merge two JSON files',
-    schedule_interval='@daily',  # Adjust the schedule as needed
-    access_control={
-		'role_liav': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		},
-        'role_Admin': {
-			'can_read',
-			'can_edit',
-			'can_delete'
-		}
-	}
+    description='DAG to merge two JSON files',
+    schedule_interval=None,  # Set to your desired schedule or None if you want to trigger manually
 )
 
+# Function to merge JSON files
 def merge_json_files(**kwargs):
-    # Get the list of JSON files in the specified path
-    folder_path = "file:///mounts/shared-volume/json"
-    json_files = [f for f in os.listdir(folder_path) if f.endswith(".json")]
+    source_path = "/mounts/shared-volume/json"
+    
+    # List files in the source directory
+    files = os.listdir(source_path)
+    
+    if len(files) != 2:
+        raise ValueError("Exactly two JSON files are required for merging.")
+    
+    # Load JSON data from files
+    file1_path = os.path.join(source_path, files[0])
+    file2_path = os.path.join(source_path, files[1])
+    
+    with open(file1_path, 'r') as file1:
+        data1 = json.load(file1)
+    
+    with open(file2_path, 'r') as file2:
+        data2 = json.load(file2)
+    
+    # Merge JSON data
+    merged_data = {**data1, **data2}
+    
+    # Save the merged data to a new file
+    output_path = os.path.join(source_path, 'merged_output.json')
+    with open(output_path, 'w') as output_file:
+        json.dump(merged_data, output_file)
+    
+    return output_path
 
-    # Check if there are at least two files to merge
-    if len(json_files) < 2:
-        print("Not enough JSON files to merge.")
-        return
+# Define tasks
+start_task = DummyOperator(task_id='start', dag=dag)
 
-    # Assuming the file names contain unique identifiers
-    file1, file2 = json_files[:2]
-
-    # Load JSON data from the files
-    df1 = pd.read_json(f"{folder_path}/{file1}")
-    df2 = pd.read_json(f"{folder_path}/{file2}")
-
-    # Merge the DataFrames based on common columns
-    merged_df = pd.merge(df1, df2, on="common_column", how="inner")
-
-    # Save the merged DataFrame to a new JSON file
-    output_path = f"{folder_path}/merged_output.json"
-    merged_df.to_json(output_path, orient="records")
-
-    print(f"Merged data saved to {output_path}")
-
-# Define the tasks in the DAG
 merge_json_task = PythonOperator(
     task_id='merge_json',
     python_callable=merge_json_files,
-    provide_context=True,  # Pass context (e.g., execution_date) to the Python function
+    provide_context=True,
     dag=dag,
 )
 
-# Set task dependencies
-merge_json_task
-
-if __name__ == "__main__":
-    dag.cli()
+# Set up dependencies
+start_task >> merge_json_task
