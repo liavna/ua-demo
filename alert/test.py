@@ -19,7 +19,7 @@ dag = DAG(
     description='DAG to run PySpark job on Kubernetes',
     schedule_interval='*/5 * * * *',  # Run every 5 minutes
     catchup=False,
-  access_control={
+    access_control={
 		'role_liav': {
 			'can_read',
 			'can_edit',
@@ -82,9 +82,7 @@ spark_job_task = KubernetesPodOperator(
     cmds=["/bin/bash", "-c"],
     arguments=["/path/to/your/spark_script.py"],
     namespace="your_airflow_namespace",
-    is_delete_pod_operator=True,
     dag=dag,
 )
 
 run_spark_job_task >> spark_job_task
-
