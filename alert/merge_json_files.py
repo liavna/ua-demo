@@ -23,16 +23,18 @@ dag = DAG(
     description='Convert JSON to CSV using PySpark',
     schedule_interval=None,  # You can set a specific schedule if needed
     access_control={
-        'role_liav': {
-            permissions.ACTION_CAN_READ,
-            permissions.ACTION_CAN_EDIT,
-            permissions.ACTION_CAN_DELETE,
-        },
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
         'role_Admin': {
-            permissions.ACTION_CAN_READ,
-            permissions.ACTION_CAN_EDIT,
-            permissions.ACTION_CAN_DELETE,
-        },
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
+
     },
 )
 
