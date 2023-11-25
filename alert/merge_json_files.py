@@ -59,7 +59,7 @@ def convert_json_to_csv():
     df = spark.read.json(spark.sparkContext.parallelize([data_json_str]))
 
     # Specify the CSV file path
-    csv_file_path = "/path/to/your/output/folder/"
+    csv_file_path = "file:///mounts/shared-volume/ua-demo/alerts/data/"
 
     # Repartition to a single partition and coalesce to a single file
     df.repartition(1).coalesce(1).write.csv(
