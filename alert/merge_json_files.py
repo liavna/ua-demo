@@ -6,6 +6,7 @@ import requests
 import json
 import os
 import shutil
+import glob
 
 # Default arguments for the DAG
 default_args = {
@@ -26,4 +27,59 @@ dag = DAG(
     schedule_interval=timedelta(days=1),  # Set the desired schedule interval
 )
 
-# Continue with the rest of the code...
+# Define the Python function to convert JSON to CSV
+def convert_json_to_csv():
+    # Set up Spark session
+    spark = SparkSession.builder.appName("JsonToCsv").getOrCreate()
+
+    # JSON URL
+    json_url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
+
+    # Fetch JSON data
+    response = requests.get(json_url)
+    data_json = response.json()
+
+    # Convert JSON data to a JSON string
+    data_json_str = json.dumps(data_json)
+
+    # Create a PySpark DataFrame from the JSON data
+    df = spark.read.json(spark.sparkContext.parallelize([data_json_str]))
+
+    # Specify the CSV file path
+    csv_file_path = "/path/to/your/output/folder/"
+
+    # Repartition to a single partition and coalesce to a single file
+    df.repartition(1).coalesce(1).write.csv(
+        csv_file_path,
+        header=True,
+        mode="overwrite",
+        compression="none"
+    )
+
+    # Delete _SUCCESS file and part-00000* files
+    success_file = os.path.join(csv_file_path, "_SUCCESS")
+
+    if os.path.exists(success_file):
+        os.remove(success_file)
+
+    # Use shutil to remove multiple files matching the pattern
+    for file in glob.glob(os.path.join(csv_file_path, "*.csv")):
+        os.remove(file)
+
+    # Stop the Spark session
+    spark.stop()
+
+# Define the PythonOperator to run the conversion task
+convert_task = PythonOperator(
+    task_id='convert_json_to_csv',
+    python_callable=convert_json_to_csv,
+    dag=dag,
+)
+
+# Set task dependencies if needed
+# convert_task.set_upstream(...)
+
+# You can continue adding more tasks to the DAG as needed
+
+if __name__ == "__main__":
+    dag.cli()
