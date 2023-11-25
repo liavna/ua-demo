@@ -25,6 +25,19 @@ dag = DAG(
     default_args=default_args,
     description='Convert JSON to CSV with PySpark and Airflow',
     schedule_interval=timedelta(days=1),  # Set the desired schedule interval
+    access_control={
+		'role_liav': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		},
+        'role_Admin': {
+			'can_read',
+			'can_edit',
+			'can_delete'
+		}
+	},
+
 )
 
 # Define the Python function to convert JSON to CSV
