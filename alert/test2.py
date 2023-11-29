@@ -8,7 +8,7 @@ from airflow.providers.cncf.kubernetes.sensors.spark_kubernetes import SparkKube
 from airflow.utils.dates import days_ago
 
 
-def download_and_save_json(**kwargs):
+def get_alerts_new(**kwargs):
     url = "https://www.oref.org.il/WarningMessages/History/AlertsHistory.json"
     save_path = "/usr/local/airflow/dags/AlertsHistory.json"
 
@@ -49,7 +49,7 @@ dag = DAG(
 
 download_task = PythonOperator(
     task_id='download_json_task',
-    python_callable=download_and_save_json,
+    python_callable=get_alerts_new,
     provide_context=True,
     dag=dag,
 )
